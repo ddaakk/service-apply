@@ -1,5 +1,6 @@
 package apply.application
 
+import apply.EMAIL
 import apply.createAssignment
 import apply.createEvaluation
 import apply.createEvaluationTarget
@@ -21,13 +22,12 @@ import io.kotest.extensions.spring.SpringTestLifecycleMode
 import io.kotest.matchers.booleans.shouldBeFalse
 import io.kotest.matchers.booleans.shouldBeTrue
 import io.kotest.matchers.collections.shouldHaveSize
-import io.kotest.matchers.collections.shouldNotBeEmpty
 import org.springframework.transaction.annotation.Transactional
 import support.test.IntegrationTest
 
 @Transactional
 @IntegrationTest
-class MyMissionServiceTest(
+class MyMissionIntegrationTest(
     private val myMissionService: MyMissionService,
     private val userRepository: UserRepository,
     private val recruitmentRepository: RecruitmentRepository,
@@ -39,115 +39,95 @@ class MyMissionServiceTest(
 ) : BehaviorSpec({
     extensions(SpringTestExtension(SpringTestLifecycleMode.Root))
 
-    Given("자동 채점 항목이 존재하지 않는 경우") {
-        val user = userRepository.save(createUser())
-        val recruitment = recruitmentRepository.save(createRecruitment())
-        val evaluation = evaluationRepository.save(createEvaluation(recruitmentId = recruitment.id))
-        val target = evaluationTargetRepository.save(
-            createEvaluationTarget(evaluationId = evaluation.id, userId = user.id)
-        )
-        val mission = missionRepository.save(createMission(evaluationId = evaluation.id, hidden = false))
-
-        When("해당 사용자의 특정 모집에 대한 모든 과제를 조회하면") {
-            val actual = myMissionService.findAllByUserIdAndRecruitmentId(target.id, recruitment.id)
-
-            Then("예제 테스트를 실행할 수 없음을 확인할 수 있다") {
-                actual shouldHaveSize 1
-                actual[0].testable.shouldBeFalse()
-            }
-        }
-    }
-
-    fun saveEvaluationTarget(evaluationId: Long, email: String): EvaluationTarget {
+    fun saveEvaluationTarget(evaluationId: Long, email: String = EMAIL): EvaluationTarget {
         val user = userRepository.save(createUser(email = email))
         return evaluationTargetRepository.save(createEvaluationTarget(evaluationId = evaluationId, userId = user.id))
     }
 
-    Given("과제가 존재하는 평가에 대해 여러 명의 평가 대상자가 존재하는 경우") {
+    Given("특정 모집의 과제가 있는 평가에 여러 평가 대상자가 있는 경우") {
         val recruitment = recruitmentRepository.save(createRecruitment())
         val evaluation = evaluationRepository.save(createEvaluation(recruitmentId = recruitment.id))
         missionRepository.save(createMission(evaluationId = evaluation.id, hidden = false))
+        saveEvaluationTarget(evaluation.id, "jason@email.com")
+        val target = saveEvaluationTarget(evaluation.id, "pepper@email.com")
 
-        saveEvaluationTarget(evaluation.id, "a@email.com")
-        val target = saveEvaluationTarget(evaluation.id, "b@email.com")
-
-        When("특정 평가 대상자의 특정 모집에 대한 모든 과제를 조회하면") {
+        When("해당 모집에 대한 특정 지원자의 모든 과제를 조회하면") {
             val actual = myMissionService.findAllByUserIdAndRecruitmentId(target.userId, recruitment.id)
 
-            Then("과제를 확인할 수 있다") {
-                actual.shouldNotBeEmpty()
+            Then("모든 과제를 확인할 수 있다") {
+                actual shouldHaveSize 1
             }
         }
     }
 
-    Given("자동 채점 항목이 있고 지원자가 과제 제출물을 제출하지 않은 경우") {
+    Given("특정 모집의 평가에 자동 채점 항목이 없는 과제 및 평가 대상자가 있는 경우") {
+        val recruitment = recruitmentRepository.save(createRecruitment())
+        val evaluation = evaluationRepository.save(createEvaluation(recruitmentId = recruitment.id))
+        missionRepository.save(createMission(evaluationId = evaluation.id, hidden = false))
+        val target = saveEvaluationTarget(evaluation.id)
+
+        When("해당 모집에 대한 지원자의 모든 과제를 조회하면") {
+            val actual = myMissionService.findAllByUserIdAndRecruitmentId(target.userId, recruitment.id)
+
+            Then("과제 제출물이 제출되었는지 여부와 예제 테스트를 실행할 수 있는지 여부를 확인할 수 있다") {
+                actual shouldHaveSize 1
+                actual[0].submitted.shouldBeFalse()
+                actual[0].testable.shouldBeFalse()
+            }
+        }
+    }
+
+    Given("특정 모집의 평가에 자동 채점 항목이 있는 과제 및 평가 대상자가 있는 경우") {
         val recruitment = recruitmentRepository.save(createRecruitment())
         val evaluation = evaluationRepository.save(createEvaluation(recruitmentId = recruitment.id))
         val mission = missionRepository.save(createMission(evaluationId = evaluation.id, hidden = false))
         judgmentItemRepository.save(createJudgmentItem(missionId = mission.id))
-        val target = saveEvaluationTarget(evaluation.id, "a@email.com")
+        val target = saveEvaluationTarget(evaluation.id)
 
-        When("해당 사용자의 특정 모집에 대한 모든 과제를 조회하면") {
+        When("해당 모집에 대한 지원자의 모든 과제를 조회하면") {
             val actual = myMissionService.findAllByUserIdAndRecruitmentId(target.userId, recruitment.id)
 
-            Then("예제 테스트를 실행할 수 있음과 과제 제출물을 제출하지 않음을 확인할 수 있다") {
+            Then("해당 과제가 예제 테스트를 실행할 수 있음을 알 수 있다") {
                 actual shouldHaveSize 1
-                actual[0].testable.shouldBeTrue()
                 actual[0].submitted.shouldBeFalse()
+                actual[0].testable.shouldBeTrue()
             }
         }
     }
 
-    Given("과제가 자동 채점 항목이 있고 지원자가 과제 제출물을 제출한 경우") {
+    Given("특정 모집의 평가에 자동 채점 항목이 없는 과제 및 과제 제출물을 제출한 평가 대상자가 있는 경우") {
+        val recruitment = recruitmentRepository.save(createRecruitment())
+        val evaluation = evaluationRepository.save(createEvaluation(recruitmentId = recruitment.id))
+        val mission = missionRepository.save(createMission(evaluationId = evaluation.id, hidden = false))
+        val target = saveEvaluationTarget(evaluation.id)
+        assignmentRepository.save(createAssignment(target.userId, mission.id))
+
+        When("해당 모집에 대한 지원자의 모든 과제를 조회하면") {
+            val actual = myMissionService.findAllByUserIdAndRecruitmentId(target.userId, recruitment.id)
+
+            Then("해당 과제에 대한 과제 제출물을 제출했으며 예제 테스트를 실행할 수 없음을 알 수 있다") {
+                actual shouldHaveSize 1
+                actual[0].submitted.shouldBeTrue()
+                actual[0].testable.shouldBeFalse()
+            }
+        }
+    }
+
+    Given("특정 모집의 평가에 자동 채점 항목이 있는 과제 및 과제 제출물을 제출한 평가 대상자가 있는 경우") {
         val recruitment = recruitmentRepository.save(createRecruitment())
         val evaluation = evaluationRepository.save(createEvaluation(recruitmentId = recruitment.id))
         val mission = missionRepository.save(createMission(evaluationId = evaluation.id, hidden = false))
         judgmentItemRepository.save(createJudgmentItem(missionId = mission.id))
-        val target = saveEvaluationTarget(evaluation.id, "a@email.com")
+        val target = saveEvaluationTarget(evaluation.id)
         assignmentRepository.save(createAssignment(target.userId, mission.id))
 
-        When("해당 사용자의 특정 모집에 대한 모든 과제를 조회하면") {
+        When("해당 모집에 대한 지원자의 모든 과제를 조회하면") {
             val actual = myMissionService.findAllByUserIdAndRecruitmentId(target.userId, recruitment.id)
 
-            Then("예제 테스트를 실행할 수 있음과 과제 제출물을 제출 했음을 확인할 수 있다") {
+            Then("해당 과제에 대한 과제 제출물을 제출했으며 예제 테스트를 실행할 수 있음을 알 수 있다") {
                 actual shouldHaveSize 1
+                actual[0].submitted.shouldBeTrue()
                 actual[0].testable.shouldBeTrue()
-                actual[0].submitted.shouldBeTrue()
-            }
-        }
-    }
-
-    Given("과제가 자동 채점 항목이 없고 지원자가 과제 제출물을 제출하지 않은 경우") {
-        val recruitment = recruitmentRepository.save(createRecruitment())
-        val evaluation = evaluationRepository.save(createEvaluation(recruitmentId = recruitment.id))
-        missionRepository.save(createMission(evaluationId = evaluation.id, hidden = false))
-        val target = saveEvaluationTarget(evaluation.id, "a@email.com")
-
-        When("해당 사용자의 특정 모집에 대한 모든 과제를 조회하면") {
-            val actual = myMissionService.findAllByUserIdAndRecruitmentId(target.userId, recruitment.id)
-
-            Then("예제 테스트를 실행할 수 없음과 과제 제출하지 않았음을 확인할 수 있다") {
-                actual shouldHaveSize 1
-                actual[0].testable.shouldBeFalse()
-                actual[0].submitted.shouldBeFalse()
-            }
-        }
-    }
-
-    Given("과제가 자동 채점 항목이 없고 지원자가 과제 제출물을 제출한 경우") {
-        val recruitment = recruitmentRepository.save(createRecruitment())
-        val evaluation = evaluationRepository.save(createEvaluation(recruitmentId = recruitment.id))
-        val mission = missionRepository.save(createMission(evaluationId = evaluation.id, hidden = false))
-        val target = saveEvaluationTarget(evaluation.id, "a@email.com")
-        assignmentRepository.save(createAssignment(target.userId, mission.id))
-
-        When("해당 사용자의 특정 모집에 대한 모든 과제를 조회하면") {
-            val actual = myMissionService.findAllByUserIdAndRecruitmentId(target.userId, recruitment.id)
-
-            Then("예제 테스트를 실행할 수 없음과 과제 제출 했음을 확인할 수 있다") {
-                actual shouldHaveSize 1
-                actual[0].testable.shouldBeFalse()
-                actual[0].submitted.shouldBeTrue()
             }
         }
     }
