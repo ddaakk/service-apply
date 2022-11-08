@@ -53,3 +53,9 @@ PassJudgmentMission.args = {
   mission: missionsDummy["2"][4],
   recruitmentId: "6",
 };
+
+export const NotTestableMission = Template.bind({});
+NotTestableMission.args = {
+  mission: missionsDummy["2"][8],
+  recruitmentId: "1",
+};
