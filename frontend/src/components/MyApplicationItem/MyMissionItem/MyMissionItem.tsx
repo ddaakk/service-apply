@@ -78,7 +78,7 @@ const MyMissionItem = ({ mission, recruitmentId }: MyMissionItemProps) => {
           {missionItem.title}
         </RecruitmentDetail>
 
-        {missionItem.runnable && (
+        {missionItem.testable && (
           <>
             <hr className={styles["auto-judgment-detail-contour"]} />
             <MissionDetail judgment={missionItem.judgment} />

@@ -21,7 +21,7 @@ const RefreshButton = ({ recruitmentId, missionItem, setMission }: RefreshButton
   const status = missionItem.judgment?.status;
 
   if (
-    missionItem.runnable === false ||
+    missionItem.testable === false ||
     status !== JUDGMENT_STATUS.STARTED ||
     missionItem.status !== MISSION_STATUS.SUBMITTING
   ) {

@@ -20,7 +20,7 @@ const JudgmentButton = ({ missionItem, recruitmentId, setMission }: JudgmentButt
   const missionStatus = missionItem.status;
   const judgment = missionItem.judgment;
 
-  if (missionItem.runnable === false) {
+  if (missionItem.testable === false) {
     return null;
   }
 
