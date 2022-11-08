@@ -78,9 +78,12 @@ const MyMissionItem = ({ mission, recruitmentId }: MyMissionItemProps) => {
           {missionItem.title}
         </RecruitmentDetail>
 
-        <hr className={styles["auto-judgment-detail-contour"]} />
-
-        <MissionDetail judgment={missionItem.judgment} />
+        {missionItem.runnable && (
+          <>
+            <hr className={styles["auto-judgment-detail-contour"]} />
+            <MissionDetail judgment={missionItem.judgment} />
+          </>
+        )}
 
         <div className={styles["button-container"]}>
           <RefreshButton
