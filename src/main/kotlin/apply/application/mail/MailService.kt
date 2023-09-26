@@ -9,6 +9,7 @@ import apply.domain.recruitment.getOrThrow
 import apply.domain.user.PasswordResetEvent
 import apply.domain.user.UserRepository
 import apply.domain.user.getOrThrow
+import mu.KotlinLogging
 import org.springframework.boot.autoconfigure.mail.MailProperties
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.scheduling.annotation.Async
@@ -17,6 +18,8 @@ import org.springframework.transaction.event.TransactionalEventListener
 import org.thymeleaf.context.Context
 import org.thymeleaf.spring5.ISpringTemplateEngine
 import support.markdownToEmbeddedHtml
+
+private val logger = KotlinLogging.logger {}
 
 private const val MAIL_SENDING_UNIT: Int = 50
 
@@ -99,8 +102,12 @@ class MailService(
         for (addresses in recipients.chunked(MAIL_SENDING_UNIT)) {
             runCatching { mailSender.sendBcc(addresses, request.subject, body, files) }
                 .onSuccess { succeeded.addAll(addresses) }
-                .onFailure { failed.addAll(addresses) }
+                .onFailure {
+                    failed.addAll(addresses)
+                    logger.error { it }
+                }
         }
+        logger.info { "succeeded: ${succeeded.size}, failed: ${failed.size}, $failed" }
 
         mailHistoryRepository.save(
             MailHistory(

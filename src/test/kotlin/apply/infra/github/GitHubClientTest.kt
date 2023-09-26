@@ -20,6 +20,11 @@ class GitHubClientTest(
         actual shouldBe createCommit("eeb43de3f53f4bec08e7d63f07badb66c12dfa31")
     }
 
+    "100개 이상의 커밋이 있더라도 마지막 커밋을 조회한다" {
+        val actual = gitHubClient.getLastCommit("https://github.com/woowacourse-precourse/java-onboarding/pull/427", now)
+        actual shouldBe createCommit("a3278bff3ae05a5085601cbc3d26c27ff89a9026")
+    }
+
     "설정된 날짜와 시간을 기준으로 마지막 커밋을 조회한다" {
         val actual = gitHubClient.getLastCommit(PULL_REQUEST_URL, createLocalDateTime(2021, 10, 11))
         actual shouldBe createCommit("8c2d61313838d9220848bd38a5a5adc34efc5169")
