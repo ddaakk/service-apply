@@ -1,4 +1,7 @@
 version: 0.2
+env:
+  variables:
+    CUSTOM_JAR_NAME: "apply"
 phases:
   pre_build:
     commands:
@@ -13,6 +16,7 @@ phases:
     commands:
       - echo $(basename ./build/libs/*.jar)
       - mv ./build/libs/*.jar ./
+      - echo $(basename ./*.jar)
 artifacts:
   files:
     - ./*.jar

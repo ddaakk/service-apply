@@ -82,7 +82,8 @@
       "webpack-babel-multi-target-plugin": "2.5.0",
       "webpack-cli": "3.3.11",
       "webpack-dev-server": "3.11.0",
-      "webpack-merge": "4.2.2"
+      "webpack-merge": "4.2.2",
+      "@babel/plugin-proposal-object-rest-spread": "^7.20.7"
     },
     "hash": "18fb5c8fd2aad2620fb1ac8272cbbfb4376b2c3713fd40ee1acea2c672d4422a"
   },
