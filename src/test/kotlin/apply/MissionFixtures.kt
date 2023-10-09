@@ -68,20 +68,22 @@ fun createMissionData(
 
 fun createMissionResponse(
     title: String = MISSION_TITLE,
-    description: String = MISSION_DESCRIPTION,
-    submittable: Boolean = true,
     startDateTime: LocalDateTime = START_DATE_TIME,
     endDateTime: LocalDateTime = END_DATE_TIME,
+    description: String = MISSION_DESCRIPTION,
+    submittable: Boolean = true,
+    submissionMethod: SubmissionMethod = SubmissionMethod.PUBLIC_PULL_REQUEST,
     missionStatus: MissionStatus = MissionStatus.SUBMITTING,
     id: Long = 0L
 ): MissionResponse {
     return MissionResponse(
         id,
         title,
-        description,
-        submittable,
         startDateTime,
         endDateTime,
+        description,
+        submittable,
+        submissionMethod,
         missionStatus
     )
 }

@@ -83,19 +83,21 @@ data class MissionAndEvaluationResponse(
 data class MissionResponse(
     val id: Long,
     val title: String,
-    val description: String,
-    val submittable: Boolean,
     val startDateTime: LocalDateTime,
     val endDateTime: LocalDateTime,
+    val description: String,
+    val submittable: Boolean,
+    val submissionMethod: SubmissionMethod,
     val status: MissionStatus
 ) {
     constructor(mission: Mission) : this(
         mission.id,
         mission.title,
-        mission.description,
-        mission.submittable,
         mission.period.startDateTime,
         mission.period.endDateTime,
+        mission.description,
+        mission.submittable,
+        mission.submissionMethod,
         mission.status
     )
 }
