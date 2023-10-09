@@ -8,6 +8,7 @@ import apply.application.MissionResponse
 import apply.application.MyMissionResponse
 import apply.domain.mission.Mission
 import apply.domain.mission.MissionStatus
+import apply.domain.mission.SubmissionMethod
 import java.time.LocalDateTime
 
 private const val MISSION_TITLE: String = "숫자야구게임"
@@ -17,15 +18,26 @@ private val END_DATE_TIME: LocalDateTime = LocalDateTime.now().plusDays(7L)
 
 fun createMission(
     title: String = MISSION_TITLE,
-    description: String = MISSION_DESCRIPTION,
     evaluationId: Long = 1L,
     startDateTime: LocalDateTime = START_DATE_TIME,
     endDateTime: LocalDateTime = END_DATE_TIME,
+    description: String = MISSION_DESCRIPTION,
     submittable: Boolean = true,
     hidden: Boolean = false,
+    submissionMethod: SubmissionMethod = SubmissionMethod.PUBLIC_PULL_REQUEST,
     id: Long = 0L
 ): Mission {
-    return Mission(title, description, evaluationId, startDateTime, endDateTime, submittable, hidden, id)
+    return Mission(
+        title,
+        evaluationId,
+        startDateTime,
+        endDateTime,
+        description,
+        submittable,
+        hidden,
+        submissionMethod,
+        id
+    )
 }
 
 fun createMissionData(
@@ -34,9 +46,9 @@ fun createMissionData(
     startDateTime: LocalDateTime = START_DATE_TIME,
     endDateTime: LocalDateTime = END_DATE_TIME,
     description: String = MISSION_DESCRIPTION,
-    judgmentItemData: JudgmentItemData = JudgmentItemData(),
     submittable: Boolean = true,
     hidden: Boolean = true,
+    judgmentItemData: JudgmentItemData = JudgmentItemData(),
     id: Long = 0L
 ): MissionData {
     return MissionData(
@@ -45,10 +57,10 @@ fun createMissionData(
         startDateTime,
         endDateTime,
         description,
-        judgmentItemData,
         submittable,
         hidden,
-        id
+        judgmentItemData = judgmentItemData,
+        id = id
     )
 }
 

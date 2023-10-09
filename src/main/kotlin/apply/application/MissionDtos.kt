@@ -6,6 +6,7 @@ import apply.domain.judgmentitem.JudgmentItem
 import apply.domain.judgmentitem.ProgrammingLanguage
 import apply.domain.mission.Mission
 import apply.domain.mission.MissionStatus
+import apply.domain.mission.SubmissionMethod
 import java.time.LocalDateTime
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
@@ -27,13 +28,16 @@ data class MissionData(
 
     @field:NotBlank
     var description: String = "",
-    var judgmentItemData: JudgmentItemData = JudgmentItemData(),
 
     @field:NotNull
     var submittable: Boolean = false,
 
     @field:NotNull
     var hidden: Boolean = true,
+
+    @field:NotNull
+    var submissionMethod: SubmissionMethod = SubmissionMethod.PUBLIC_PULL_REQUEST,
+    var judgmentItemData: JudgmentItemData = JudgmentItemData(),
     var id: Long = 0L
 ) {
     constructor(mission: Mission, evaluation: Evaluation, judgmentItemData: JudgmentItemData) : this(
@@ -42,10 +46,10 @@ data class MissionData(
         mission.period.startDateTime,
         mission.period.endDateTime,
         mission.description,
-        judgmentItemData,
         mission.submittable,
         mission.hidden,
-        mission.id
+        judgmentItemData = judgmentItemData,
+        id = mission.id
     )
 }
 
