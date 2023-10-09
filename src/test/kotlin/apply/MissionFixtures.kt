@@ -90,12 +90,13 @@ fun createMissionResponse(
 
 fun createMyMissionResponse(
     title: String = MISSION_TITLE,
-    description: String = MISSION_DESCRIPTION,
-    submittable: Boolean = true,
-    submitted: Boolean = true,
     startDateTime: LocalDateTime = START_DATE_TIME,
     endDateTime: LocalDateTime = END_DATE_TIME,
-    missionStatus: MissionStatus = MissionStatus.SUBMITTING,
+    description: String = MISSION_DESCRIPTION,
+    submittable: Boolean = true,
+    submissionMethod: SubmissionMethod = SubmissionMethod.PUBLIC_PULL_REQUEST,
+    status: MissionStatus = MissionStatus.SUBMITTING,
+    submitted: Boolean = true,
     runnable: Boolean = true,
     judgment: LastJudgmentResponse? = createLastJudgmentResponse(),
     id: Long = 0L
@@ -103,12 +104,13 @@ fun createMyMissionResponse(
     return MyMissionResponse(
         id,
         title,
-        description,
-        submittable,
-        submitted,
         startDateTime,
         endDateTime,
-        missionStatus,
+        description,
+        submittable,
+        submissionMethod,
+        status,
+        submitted,
         runnable,
         judgment
     )

@@ -107,12 +107,13 @@ data class MissionResponse(
 data class MyMissionResponse(
     val id: Long,
     val title: String,
-    val description: String,
-    val submittable: Boolean,
-    val submitted: Boolean,
     val startDateTime: LocalDateTime,
     val endDateTime: LocalDateTime,
+    val description: String,
+    val submittable: Boolean,
+    val submissionMethod: SubmissionMethod,
     val status: MissionStatus,
+    val submitted: Boolean,
     val runnable: Boolean,
     val judgment: LastJudgmentResponse?
 ) {
@@ -124,12 +125,13 @@ data class MyMissionResponse(
     ) : this(
         mission.id,
         mission.title,
-        mission.description,
-        mission.submittable,
-        submitted,
         mission.period.startDateTime,
         mission.period.endDateTime,
+        mission.description,
+        mission.submittable,
+        mission.submissionMethod,
         mission.status,
+        submitted,
         runnable,
         judgment
     )
