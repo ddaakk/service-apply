@@ -48,8 +48,9 @@ data class MissionData(
         mission.description,
         mission.submittable,
         mission.hidden,
-        judgmentItemData = judgmentItemData,
-        id = mission.id
+        mission.submissionMethod,
+        judgmentItemData,
+        mission.id
     )
 }
 

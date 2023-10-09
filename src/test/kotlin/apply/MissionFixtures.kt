@@ -48,6 +48,7 @@ fun createMissionData(
     description: String = MISSION_DESCRIPTION,
     submittable: Boolean = true,
     hidden: Boolean = true,
+    submissionMethod: SubmissionMethod = SubmissionMethod.PUBLIC_PULL_REQUEST,
     judgmentItemData: JudgmentItemData = JudgmentItemData(),
     id: Long = 0L
 ): MissionData {
@@ -59,8 +60,9 @@ fun createMissionData(
         description,
         submittable,
         hidden,
-        judgmentItemData = judgmentItemData,
-        id = id
+        submissionMethod,
+        judgmentItemData,
+        id
     )
 }
 

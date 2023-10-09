@@ -44,20 +44,16 @@ class MissionService(
     private fun validate(request: MissionData) {
         val evaluationId = request.evaluation.id
         require(evaluationRepository.existsById(evaluationId)) { "평가가 존재하지 않습니다. id: $evaluationId" }
-        if (isNew(request)) {
-            check(!missionRepository.existsByEvaluationId(evaluationId)) {
-                "이미 과제가 등록된 평가입니다. evaluationId: $evaluationId"
-            }
+        if (request.isNew()) {
+            check(!missionRepository.existsByEvaluationId(evaluationId)) { "이미 과제가 등록된 평가입니다. evaluationId: $evaluationId" }
         } else {
             val mission = missionRepository.getOrThrow(request.id)
-            check(mission.evaluationId == evaluationId) {
-                "과제의 평가는 수정할 수 없습니다."
-            }
+            check(evaluationId == mission.evaluationId) { "과제의 평가는 수정할 수 없습니다." }
         }
     }
 
-    private fun isNew(request: MissionData): Boolean {
-        return request.id == 0L || !missionRepository.existsById(request.id)
+    private fun MissionData.isNew(): Boolean {
+        return id == 0L || !missionRepository.existsById(id)
     }
 
     private fun JudgmentItem.update(request: MissionData) {
