@@ -32,7 +32,7 @@ class Mission(
     @Column(nullable = false)
     var hidden: Boolean = true,
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'PUBLIC_PULL_REQUEST'")
     @Enumerated(EnumType.STRING)
     val submissionMethod: SubmissionMethod,
     id: Long = 0L
