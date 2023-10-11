@@ -5,7 +5,6 @@ import apply.application.EvaluationSelectData
 import apply.application.JudgmentItemData
 import apply.application.MissionData
 import apply.domain.mission.SubmissionMethod
-import apply.domain.mission.SubmissionMethod.PRIVATE_REPOSITORY
 import apply.domain.mission.SubmissionMethod.PUBLIC_PULL_REQUEST
 import com.vaadin.flow.component.Text
 import com.vaadin.flow.component.button.Button
@@ -58,15 +57,7 @@ class MissionForm() : BindingIdentityFormLayout<MissionData>(MissionData::class)
             setItems(*SubmissionMethod.values())
             label = "제출 방식"
             value = PUBLIC_PULL_REQUEST
-            setRenderer(
-                ComponentRenderer { submissionMethod ->
-                    val text = when (submissionMethod) {
-                        PUBLIC_PULL_REQUEST -> "공개 풀 리퀘스트"
-                        PRIVATE_REPOSITORY -> "비공개 저장소"
-                    }
-                    Text(text)
-                }
-            )
+            setRenderer(ComponentRenderer { submissionMethod -> Text(submissionMethod.label) })
         }
     }
 

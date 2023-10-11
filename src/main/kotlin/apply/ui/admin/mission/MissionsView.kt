@@ -4,7 +4,6 @@ import apply.application.MissionAndEvaluationResponse
 import apply.application.MissionService
 import apply.application.RecruitmentService
 import apply.domain.mission.MissionStatus
-import apply.domain.mission.SubmissionMethod
 import apply.ui.admin.BaseLayout
 import com.vaadin.flow.component.Component
 import com.vaadin.flow.component.UI
@@ -63,7 +62,7 @@ class MissionsView(
             addSortableDateTimeColumn("종료일시", MissionAndEvaluationResponse::endDateTime)
             addSortableColumn("상태") { it.status.toText() }
             addSortableColumn("공개 여부") { it.hidden.toText() }
-            addSortableColumn("제출 방식") { it.submissionMethod.toText() }
+            addSortableColumn("제출 방식") { it.submissionMethod.label }
             addColumn(createButtonRenderer()).apply { isAutoWidth = true }
             setItems(missionService.findAllByRecruitmentId(recruitmentId))
         }
@@ -103,12 +102,5 @@ class MissionsView(
 
     private fun Boolean.toText(): String {
         return if (this) "비공개" else "공개"
-    }
-
-    private fun SubmissionMethod.toText(): String {
-        return when (this) {
-            SubmissionMethod.PUBLIC_PULL_REQUEST -> "공개 풀 리퀘스트"
-            SubmissionMethod.PRIVATE_REPOSITORY -> "비공개 저장소"
-        }
     }
 }
