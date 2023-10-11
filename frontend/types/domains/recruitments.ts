@@ -37,7 +37,7 @@ export type Mission = {
   status: MissionStatus;
   runnable: boolean;
   judgment: {
-    pullRequestUrl: string;
+    url: string;
     commitHash: string;
     status: JudgmentStatus;
     passCount: number;
