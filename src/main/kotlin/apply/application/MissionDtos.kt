@@ -27,6 +27,7 @@ data class MissionData(
     var endDateTime: LocalDateTime = LocalDateTime.MIN,
 
     @field:NotBlank
+    @field:Size(min = 1, max = 255)
     var description: String = "",
 
     @field:NotNull

@@ -23,7 +23,7 @@ class Mission(
     @Embedded
     var period: MissionPeriod,
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 255)
     val description: String,
 
     @Column(nullable = false)
