@@ -17,7 +17,7 @@ describe("useAssignmentForm", () => {
     // then
     expect(result.current.form).toEqual({
       githubUsername: "",
-      pullRequestUrl: "", // TODO: pullRequestUrl -> url로 변경
+      url: "",
       note: "",
     });
   });

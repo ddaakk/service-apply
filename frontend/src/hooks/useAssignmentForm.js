@@ -7,7 +7,7 @@ import { MISSION_SUBMISSION_METHOD } from "../constants/recruitment";
 
 export const ASSIGNMENT_FORM_NAME = {
   GITHUB_USERNAME: "githubUsername",
-  URL: "pullRequestUrl", // TODO: pullRequestUrl -> url로 변경
+  URL: "url",
   NOTE: "note",
 };
 
