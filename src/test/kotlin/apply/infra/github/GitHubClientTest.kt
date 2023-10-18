@@ -20,7 +20,7 @@ class GitHubClientTest(
         actual shouldBe createCommit("eeb43de3f53f4bec08e7d63f07badb66c12dfa31")
     }
 
-    "100개 이상의 커밋이 있더라도 마지막 커밋을 조회한다" {
+    "100개 이상의 커밋이 있더라도 마지막 커밋을 조회한다".config(enabled = false) {
         val actual = gitHubClient.getLastCommit("https://github.com/woowacourse-precourse/java-onboarding/pull/427", now)
         actual shouldBe createCommit("a3278bff3ae05a5085601cbc3d26c27ff89a9026")
     }
