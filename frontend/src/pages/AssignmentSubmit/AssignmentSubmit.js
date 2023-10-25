@@ -27,6 +27,10 @@ const AssignmentSubmit = () => {
 
   const submissionMethod =
     currentMission?.submissionMethod ?? MISSION_SUBMISSION_METHOD.PUBLIC_PULL_REQUEST;
+  const urlInputLabel =
+    submissionMethod === MISSION_SUBMISSION_METHOD.PRIVATE_REPOSITORY
+      ? "GitHub Repository 주소"
+      : "Pull Request 주소";
 
   const {
     form,
@@ -103,11 +107,7 @@ const AssignmentSubmit = () => {
           required
         />
         <MessageTextInput
-          label={
-            submissionMethod === MISSION_SUBMISSION_METHOD.PRIVATE_REPOSITORY
-              ? "GitHub Repository 주소"
-              : "Pull Request 주소"
-          }
+          label={urlInputLabel}
           type="url"
           name={ASSIGNMENT_FORM_NAME.URL}
           value={form[ASSIGNMENT_FORM_NAME.URL]}
