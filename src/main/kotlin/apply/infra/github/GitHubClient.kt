@@ -41,8 +41,18 @@ class GitHubClient(
 
     private fun getLastCommitFromPullRequest(url: String, endDateTime: LocalDateTime): Commit {
         val (owner, repo, pullNumber) = extract(url)
+        var page = 1
+        val responses = findCommits(owner, repo, pullNumber, page).toMutableList()
+        while (page != responses.page) {
+            page = responses.page
+            responses += findCommits(owner, repo, pullNumber, page)
+        }
+        return responses.last(endDateTime)
+    }
+
+    private fun findCommits(owner: String, repo: String, pullNumber: String, page: Int): List<CommitResponse> {
         val requestEntity = RequestEntity
-            .get("${gitHubProperties.uri}/repos/$owner/$repo/pulls/$pullNumber/commits?per_page=$PAGE_SIZE".toUri())
+            .get("${gitHubProperties.uri}/repos/$owner/$repo/pulls/$pullNumber/commits?per_page=$PAGE_SIZE&page=$page".toUri())
             .accept(MediaType.APPLICATION_JSON)
             .header(HttpHeaders.AUTHORIZATION, bearerToken(gitHubProperties.accessKey))
             .build()
@@ -51,12 +61,16 @@ class GitHubClient(
                 when (it) {
                     is Unauthorized -> throw RuntimeException("유효한 토큰이 아닙니다.")
                     is Forbidden -> throw RuntimeException("요청 한도에 도달했습니다.")
-                    is NotFound -> throw IllegalArgumentException("PR이 존재하지 않습니다. pullRequestUrl: $url")
+                    is NotFound -> throw IllegalArgumentException("PR이 존재하지 않습니다.")
                     else -> throw RuntimeException("예기치 않은 예외가 발생했습니다.", it)
                 }
             }
-            .map { it.last(endDateTime) }.getOrThrow()
+            .map { it.body }.getOrThrow()
+            ?: emptyList()
     }
+
+    private val List<CommitResponse>.page: Int
+        get() = size / PAGE_SIZE + 1
 
     private fun extract(pullRequestUrl: String): List<String> {
         val result = PULL_REQUEST_URL_PATTERN.find(pullRequestUrl)
@@ -87,8 +101,6 @@ class GitHubClient(
             .map { it.last(endDateTime) }.getOrThrow()
     }
 
-    private fun bearerToken(token: String): String = if (token.isEmpty()) "" else "Bearer $token"
-
     private fun ResponseEntity<List<CommitResponse>>.last(endDateTime: LocalDateTime): Commit {
         val zonedDateTime = endDateTime.atZone(ZoneId.systemDefault())
         return body
@@ -97,6 +109,16 @@ class GitHubClient(
             ?.let { Commit(it.hash) }
             ?: throw IllegalArgumentException("해당 커밋이 존재하지 않습니다. endDateTime: $endDateTime")
     }
+
+    private fun List<CommitResponse>.last(endDateTime: LocalDateTime): Commit {
+        val zonedDateTime = endDateTime.atZone(ZoneId.systemDefault())
+        return filter { it.date <= zonedDateTime }
+            .maxByOrNull { it.date }
+            ?.let { Commit(it.hash) }
+            ?: throw IllegalArgumentException("해당 커밋이 존재하지 않습니다. endDateTime: $endDateTime")
+    }
+
+    private fun bearerToken(token: String): String = if (token.isEmpty()) "" else "Bearer $token"
 
     companion object {
         private const val PAGE_SIZE: Int = 100
