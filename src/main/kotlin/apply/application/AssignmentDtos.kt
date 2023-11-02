@@ -17,7 +17,7 @@ data class AssignmentRequest(
         regexp = "https://github\\.com(/[\\w\\-]+){2}/pull/[1-9]\\d*",
         message = "올바른 형식의 Pull Request URL이어야 합니다"
     )
-    val pullRequestUrl: String,
+    val url: String,
 
     @field:Size(max = 5000)
     @field:NotBlank
@@ -26,7 +26,7 @@ data class AssignmentRequest(
 
 data class AssignmentData(
     val githubUsername: String,
-    val pullRequestUrl: String,
+    val url: String,
     val note: String,
     val id: Long
 ) {
@@ -41,7 +41,7 @@ data class AssignmentData(
 data class AssignmentResponse(
     val id: Long,
     val githubUsername: String,
-    val pullRequestUrl: String,
+    val url: String,
     val note: String
 ) {
     constructor(assignment: Assignment) : this(
