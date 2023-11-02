@@ -5,6 +5,7 @@ import apply.domain.judgment.JudgmentRecord
 import apply.domain.judgment.JudgmentStatus
 import apply.domain.judgment.JudgmentType
 import apply.domain.judgmentitem.ProgrammingLanguage
+import apply.domain.mission.SubmissionMethod
 import java.time.LocalDateTime
 
 data class LastJudgmentResponse(
@@ -35,7 +36,8 @@ data class JudgmentRequest(
     val judgmentType: JudgmentType,
     val programmingLanguage: ProgrammingLanguage,
     val testName: String,
-    val pullRequestUrl: String,
+    val submissionMethod: SubmissionMethod,
+    val url: String,
     val commit: Commit
 )
 
