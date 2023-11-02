@@ -24,6 +24,7 @@ import apply.domain.mail.MailHistory
 import apply.domain.mail.MailHistoryRepository
 import apply.domain.mission.Mission
 import apply.domain.mission.MissionRepository
+import apply.domain.mission.SubmissionMethod
 import apply.domain.recruitment.Recruitment
 import apply.domain.recruitment.RecruitmentRepository
 import apply.domain.recruitmentitem.RecruitmentItem
@@ -383,21 +384,23 @@ class DatabaseInitializer(
         val missions = listOf(
             Mission(
                 title = "1주 차 프리코스 - 숫자 야구 게임",
-                description = "https://github.com/woowacourse/java-baseball-precourse",
                 evaluationId = 2L,
                 startDateTime = createLocalDateTime(2020, 11, 24, 15),
                 endDateTime = createLocalDateTime(2120, 12, 1, 0),
+                description = "https://github.com/woowacourse/java-baseball-precourse",
                 submittable = true,
-                hidden = false
+                hidden = false,
+                submissionMethod = SubmissionMethod.PUBLIC_PULL_REQUEST
             ),
             Mission(
                 title = "2주 차 프리코스 - 자동차 경주 게임",
-                description = "https://github.com/woowacourse/java-racingcar-precourse",
                 evaluationId = 3L,
                 startDateTime = createLocalDateTime(2020, 12, 1, 15),
                 endDateTime = createLocalDateTime(2120, 12, 8, 0),
+                description = "https://github.com/woowacourse/java-racingcar-precourse",
                 submittable = true,
-                hidden = false
+                hidden = false,
+                submissionMethod = SubmissionMethod.PRIVATE_REPOSITORY
             )
         )
         missionRepository.saveAll(missions)
@@ -421,7 +424,7 @@ class DatabaseInitializer(
                 userId = 2L,
                 missionId = 1L,
                 githubUsername = "javajigi",
-                pullRequestUrl = "https://github.com/woowacourse/java-baseball-precourse/pull/1",
+                url = "https://github.com/woowacourse/java-baseball-precourse/pull/1",
                 note = "안녕하세요. 이번 미션 생각보다 쉽지 않네요."
             )
         )

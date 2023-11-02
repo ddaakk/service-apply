@@ -2,10 +2,12 @@ package apply.infra.github
 
 import apply.domain.judgment.AssignmentArchive
 import apply.domain.judgment.Commit
+import apply.domain.mission.SubmissionMethod
 import org.springframework.boot.web.client.RestTemplateBuilder
 import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.RequestEntity
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException.Forbidden
 import org.springframework.web.client.HttpClientErrorException.NotFound
@@ -23,8 +25,22 @@ class GitHubClient(
 ) : AssignmentArchive {
     private val restTemplate: RestTemplate = restTemplateBuilder.build()
 
-    override fun getLastCommit(pullRequestUrl: String, endDateTime: LocalDateTime): Commit {
-        val (owner, repo, pullNumber) = extract(pullRequestUrl)
+    /**
+     * @see [API](https://docs.github.com/en/rest/pulls/pulls#list-commits-on-a-pull-request)
+     */
+    override fun getLastCommit(
+        submissionMethod: SubmissionMethod,
+        url: String,
+        endDateTime: LocalDateTime
+    ): Commit {
+        return when (submissionMethod) {
+            SubmissionMethod.PUBLIC_PULL_REQUEST -> getLastCommitFromPullRequest(url, endDateTime)
+            SubmissionMethod.PRIVATE_REPOSITORY -> getLastCommitFromRepository(url, endDateTime)
+        }
+    }
+
+    private fun getLastCommitFromPullRequest(url: String, endDateTime: LocalDateTime): Commit {
+        val (owner, repo, pullNumber) = extract(url)
         var page = 1
         val responses = findCommits(owner, repo, pullNumber, page).toMutableList()
         while (page != responses.page) {
@@ -34,15 +50,6 @@ class GitHubClient(
         return responses.last(endDateTime)
     }
 
-    private fun extract(pullRequestUrl: String): List<String> {
-        val result = PULL_REQUEST_URL_PATTERN.find(pullRequestUrl)
-            ?: throw IllegalArgumentException("올바른 형식의 Pull Request URL이어야 합니다.")
-        return result.destructured.toList()
-    }
-
-    /**
-     * @see [API](https://docs.github.com/en/rest/pulls/pulls#list-commits-on-a-pull-request)
-     */
     private fun findCommits(owner: String, repo: String, pullNumber: String, page: Int): List<CommitResponse> {
         val requestEntity = RequestEntity
             .get("${gitHubProperties.uri}/repos/$owner/$repo/pulls/$pullNumber/commits?per_page=$PAGE_SIZE&page=$page".toUri())
@@ -65,6 +72,44 @@ class GitHubClient(
     private val List<CommitResponse>.page: Int
         get() = size / PAGE_SIZE + 1
 
+    private fun extract(pullRequestUrl: String): List<String> {
+        val result = PULL_REQUEST_URL_PATTERN.find(pullRequestUrl)
+            ?: throw IllegalArgumentException("올바른 형식의 Pull Request URL이어야 합니다.")
+        return result.destructured.toList()
+    }
+
+    /**
+     * @see [API](https://docs.github.com/en/rest/commits/commits#list-commits)
+     */
+    fun getLastCommitFromRepository(url: String, endDateTime: LocalDateTime): Commit {
+        val result = REPOSITORY_URL_PATTERN.find(url) ?: throw IllegalArgumentException("올바른 형식의 URL이어야 합니다.")
+        val (owner, repo) = result.destructured.toList()
+        val requestEntity = RequestEntity
+            .get("${gitHubProperties.uri}/repos/$owner/$repo/commits")
+            .accept(MediaType.APPLICATION_JSON)
+            .header(HttpHeaders.AUTHORIZATION, bearerToken(gitHubProperties.accessKey))
+            .build()
+        return runCatching { restTemplate.exchange<List<CommitResponse>>(requestEntity) }
+            .onFailure {
+                when (it) {
+                    is Unauthorized -> throw RuntimeException("유효한 토큰이 아닙니다.")
+                    is Forbidden -> throw RuntimeException("요청 한도에 도달했습니다.")
+                    is NotFound -> throw IllegalArgumentException("저장소가 존재하지 않습니다. url: $url")
+                    else -> throw RuntimeException("예기치 않은 예외가 발생했습니다.", it)
+                }
+            }
+            .map { it.last(endDateTime) }.getOrThrow()
+    }
+
+    private fun ResponseEntity<List<CommitResponse>>.last(endDateTime: LocalDateTime): Commit {
+        val zonedDateTime = endDateTime.atZone(ZoneId.systemDefault())
+        return body
+            ?.filter { it.date <= zonedDateTime }
+            ?.maxByOrNull { it.date }
+            ?.let { Commit(it.hash) }
+            ?: throw IllegalArgumentException("해당 커밋이 존재하지 않습니다. endDateTime: $endDateTime")
+    }
+
     private fun List<CommitResponse>.last(endDateTime: LocalDateTime): Commit {
         val zonedDateTime = endDateTime.atZone(ZoneId.systemDefault())
         return filter { it.date <= zonedDateTime }
@@ -79,5 +124,6 @@ class GitHubClient(
         private const val PAGE_SIZE: Int = 100
         private val PULL_REQUEST_URL_PATTERN: Regex =
             "https://github\\.com/(?<owner>.+)/(?<repo>.+)/pull/(?<pullNumber>\\d+)".toRegex()
+        private val REPOSITORY_URL_PATTERN: Regex = "https://github\\.com/(?<owner>.+)/(?<repo>.+)".toRegex()
     }
 }
