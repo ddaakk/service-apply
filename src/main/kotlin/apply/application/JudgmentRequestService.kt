@@ -31,7 +31,7 @@ class JudgmentRequestService(
                 judgmentItem.programmingLanguage,
                 judgmentItem.testName,
                 mission.submissionMethod,
-                assignment.pullRequestUrl,
+                assignment.url,
                 event.commit
             )
         )

@@ -32,7 +32,7 @@ data class AssignmentData(
 ) {
     constructor(assignment: Assignment?) : this(
         assignment?.githubUsername.orEmpty(),
-        assignment?.pullRequestUrl.orEmpty(),
+        assignment?.url.orEmpty(),
         assignment?.note.orEmpty(),
         assignment?.id ?: 0L
     )
@@ -47,7 +47,7 @@ data class AssignmentResponse(
     constructor(assignment: Assignment) : this(
         assignment.id,
         assignment.githubUsername,
-        assignment.pullRequestUrl,
+        assignment.url,
         assignment.note
     )
 }
