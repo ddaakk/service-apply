@@ -1,18 +1,15 @@
 import { useState } from "react";
 import { ERROR_MESSAGE } from "../constants/messages";
-import { isValidGithubUsername } from "../utils/validation/githubUsername";
 import { isValidPullRequestUrl } from "../utils/validation/pullRequestUrl";
 import { isValidRepositoryUrl } from "../utils/validation/repositoryUrl";
 import { MISSION_SUBMISSION_METHOD } from "../constants/recruitment";
 
 export const ASSIGNMENT_FORM_NAME = {
-  GITHUB_USERNAME: "githubUsername",
   URL: "url",
   NOTE: "note",
 };
 
 const initialRequiredForm = {
-  [ASSIGNMENT_FORM_NAME.GITHUB_USERNAME]: "",
   [ASSIGNMENT_FORM_NAME.URL]: "",
   [ASSIGNMENT_FORM_NAME.NOTE]: "",
 };
@@ -47,15 +44,6 @@ const useAssignmentForm = (submissionMethod = MISSION_SUBMISSION_METHOD.PUBLIC_P
       ...prev,
       [name]: errorMessage,
     }));
-  };
-
-  const handleChangeGithubUsername = ({ target }) => {
-    const errorMessage = isValidGithubUsername(target.value)
-      ? ""
-      : ERROR_MESSAGE.VALIDATION.GITHUB_USERNAME;
-
-    updateErrorMessage(ASSIGNMENT_FORM_NAME.GITHUB_USERNAME, errorMessage);
-    updateRequiredForm(ASSIGNMENT_FORM_NAME.GITHUB_USERNAME, target.value);
   };
 
   const validateUrl = (url, submissionMethod) => {
@@ -94,7 +82,6 @@ const useAssignmentForm = (submissionMethod = MISSION_SUBMISSION_METHOD.PUBLIC_P
     errorMessage,
     init,
     handleChanges: {
-      [ASSIGNMENT_FORM_NAME.GITHUB_USERNAME]: handleChangeGithubUsername,
       [ASSIGNMENT_FORM_NAME.URL]: handleChangeUrl,
       [ASSIGNMENT_FORM_NAME.NOTE]: handleChangeNote,
     },

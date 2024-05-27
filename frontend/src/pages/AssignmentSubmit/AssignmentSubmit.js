@@ -98,15 +98,6 @@ const AssignmentSubmit = () => {
     <Container title={currentMission?.title ?? ""} titleAlign={TITLE_ALIGN.LEFT}>
       <Form onSubmit={handleSubmit} className={styles.form}>
         <MessageTextInput
-          label="GitHub ID"
-          name={ASSIGNMENT_FORM_NAME.GITHUB_USERNAME}
-          value={form[ASSIGNMENT_FORM_NAME.GITHUB_USERNAME]}
-          onChange={handleChanges[ASSIGNMENT_FORM_NAME.GITHUB_USERNAME]}
-          maxLength={FORM.GITHUB_USERNAME_MAX_LENGTH}
-          errorMessage={errorMessage[ASSIGNMENT_FORM_NAME.GITHUB_USERNAME]}
-          required
-        />
-        <MessageTextInput
           label={urlInputLabel}
           type="url"
           name={ASSIGNMENT_FORM_NAME.URL}
