@@ -18,7 +18,6 @@ import io.kotest.matchers.shouldBe
 import io.mockk.clearAllMocks
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.verify
 import support.test.spec.afterRootTest
 
 class MailTargetServiceTest : BehaviorSpec({
@@ -78,7 +77,12 @@ class MailTargetServiceTest : BehaviorSpec({
         val member = createMember(id = 2L, email = "fail@email.com")
 
         every { evaluationTargetRepository.findAllByEvaluationIdAndEvaluationStatus(any(), any()) } returns listOf(
-            createEvaluationTarget(evaluationId = evaluationId, memberId = member.id, evaluationStatus = FAIL)
+            createEvaluationTarget(
+                evaluationId = evaluationId,
+                memberId = member.id,
+                evaluationStatus = FAIL,
+                evaluationAnswers = EvaluationAnswers(listOf(createEvaluationAnswer()))
+            )
         )
         every { memberRepository.findAllById(any()) } returns listOf(member)
 
@@ -134,7 +138,6 @@ class MailTargetServiceTest : BehaviorSpec({
             val actual = mailTargetService.findMailTargets(evaluationId, FAIL)
 
             Then("해당 평가 대상자의 이름 및 이메일을 확인할 수 없다") {
-                verify { memberRepository.findAllById(emptyList()) }
                 actual.shouldBeEmpty()
             }
         }

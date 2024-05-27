@@ -4,25 +4,26 @@ import support.domain.BaseRootEntity
 import java.time.LocalDate
 import java.time.Period
 import javax.persistence.AttributeOverride
+import javax.persistence.CascadeType
 import javax.persistence.Column
 import javax.persistence.Embedded
 import javax.persistence.Entity
-import javax.persistence.Table
-import javax.persistence.UniqueConstraint
+import javax.persistence.OneToOne
 
-@Table(
-    uniqueConstraints = [UniqueConstraint(name = "uk_member", columnNames = ["email"])]
-)
 @Entity
 class Member(
-    @Embedded
-    var information: MemberInformation,
+    information: MemberInformation,
 
     @AttributeOverride(name = "value", column = Column(name = "password", nullable = false))
     @Embedded
     var password: Password,
     id: Long = 0L,
 ) : BaseRootEntity<Member>(id) {
+    @OneToOne(mappedBy = "member", cascade = [CascadeType.PERSIST, CascadeType.REMOVE], orphanRemoval = true)
+    private var _information: MemberInformation? = information
+    private val information: MemberInformation
+        get() = _information ?: MemberInformation.DELETED
+
     val email: String
         get() = information.email
 
@@ -41,6 +42,7 @@ class Member(
     init {
         val age = Period.between(birthday, LocalDate.now()).years
         require(age >= 14) { "만 14세 미만은 회원 가입할 수 없습니다." }
+        information.member = this
     }
 
     constructor(
@@ -79,7 +81,13 @@ class Member(
     }
 
     fun changePhoneNumber(phoneNumber: String) {
-        information = information.copy(phoneNumber = phoneNumber)
+        information.phoneNumber = phoneNumber
+    }
+
+    fun withdraw(password: Password) {
+        identify(this.password == password) { "사용자 정보가 일치하지 않습니다." }
+        information.member = null
+        _information = null
     }
 
     private fun identify(value: Boolean, lazyMessage: () -> Any = {}) {
